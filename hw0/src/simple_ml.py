@@ -1,6 +1,7 @@
 import struct
 import numpy as np
 import gzip
+import math
 try:
     from simple_ml_ext import *
 except:
@@ -20,12 +21,12 @@ def add(x, y):
         Sum of x + y
     """
     ### BEGIN YOUR CODE
-    pass
+    return x + y
     ### END YOUR CODE
 
 
 def parse_mnist(image_filename, label_filename):
-    """ Read an images and labels file in MNIST format.  See this page:
+    """Read an images and labels file in MNIST format.  See this page:
     http://yann.lecun.com/exdb/mnist/ for a description of the file format.
 
     Args:
@@ -34,13 +35,13 @@ def parse_mnist(image_filename, label_filename):
 
     Returns:
         Tuple (X,y):
-            X (numpy.ndarray[np.float32]): 2D numpy array containing the loaded 
-                data.  The dimensionality of the data should be 
-                (num_examples x input_dim) where 'input_dim' is the full 
-                dimension of the data, e.g., since MNIST images are 28x28, it 
-                will be 784.  Values should be of type np.float32, and the data 
-                should be normalized to have a minimum value of 0.0 and a 
-                maximum value of 1.0 (i.e., scale original values of 0 to 0.0 
+            X (numpy.ndarray[np.float32]): 2D numpy array containing the loaded
+                data.  The dimensionality of the data should be
+                (num_examples x input_dim) where 'input_dim' is the full
+                dimension of the data, e.g., since MNIST images are 28x28, it
+                will be 784.  Values should be of type np.float32, and the data
+                should be normalized to have a minimum value of 0.0 and a
+                maximum value of 1.0 (i.e., scale original values of 0 to 0.0
                 and 255 to 1.0).
 
             y (numpy.ndarray[dtype=np.uint8]): 1D numpy array containing the
@@ -48,8 +49,17 @@ def parse_mnist(image_filename, label_filename):
                 for MNIST will contain the values 0-9.
     """
     ### BEGIN YOUR CODE
-    pass
-    ### END YOUR CODE
+    with gzip.open(image_filename, "rb") as f:
+        magic, num_images, rows, cols = struct.unpack(">IIII", f.read(16))
+        image_data = np.frombuffer(f.read(), dtype=np.uint8).reshape(num_images, rows * cols)
+
+    with gzip.open(label_filename, "rb") as f:
+        magic, num_labels = struct.unpack(">II", f.read(8))
+        label_data = np.frombuffer(f.read(), dtype=np.uint8)
+
+    X = image_data.astype(np.float32) / 255.0
+    y = label_data.astype(np.uint8)
+    return X, y
 
 
 def softmax_loss(Z, y):
@@ -68,7 +78,11 @@ def softmax_loss(Z, y):
         Average softmax loss over the sample.
     """
     ### BEGIN YOUR CODE
-    pass
+    batch_size = Z.shape[0]
+    loss = np.log(np.exp(Z).sum(axis=1)) - Z[np.arange(batch_size), y]
+    avg_loss = loss.sum() / batch_size
+
+    return avg_loss
     ### END YOUR CODE
 
 
@@ -91,8 +105,30 @@ def softmax_regression_epoch(X, y, theta, lr = 0.1, batch=100):
         None
     """
     ### BEGIN YOUR CODE
-    pass
+    n = X.shape[0]
+    k = theta.shape[1]
+
+    for i in range(0, n, batch):
+      X_batch = X[i:i+batch, :] # batch x input_dim
+      y_batch = y[i:i+batch]  # batch x 1
+
+      h = X_batch @ theta # batch x num_classes 
+      h_exp = np.exp(h) # batch x num_classes 
+      
+      Z = h_exp / h_exp.sum(axis=1).reshape(batch, 1) # batch x num_classes
+
+      I_y = np.zeros((batch, k)) # batch x num_classes
+      I_y[np.arange(batch), y_batch] = 1
+
+      theta_grad = (1 / batch) * X_batch.T @ (Z - I_y)
+      theta -= lr * theta_grad
+
+    return None
     ### END YOUR CODE
+
+
+def relu(x):
+  return np.maximum(0, x)
 
 
 def nn_epoch(X, y, W1, W2, lr = 0.1, batch=100):
@@ -118,8 +154,32 @@ def nn_epoch(X, y, W1, W2, lr = 0.1, batch=100):
         None
     """
     ### BEGIN YOUR CODE
-    pass
+    n = X.shape[0]
+    k = W2.shape[1]
+
+    for i in range(0, n, batch):
+      X_batch = X[i:i+batch, :] # batch x input_dim
+      y_batch = y[i:i+batch]  # batch x 1
+
+      Z1 = relu(X_batch @ W1) # batch x hidden_dim
+      logits = Z1 @ W2 # batch x num_classes
+      exp = np.exp(logits) # batch x num_classes
+
+      I_y = np.zeros((batch, k)) # batch x num_classes
+      I_y[np.arange(batch), y_batch] = 1
+
+      G2 = exp / exp.sum(axis=1, keepdims=True) - I_y # batch x num_classes
+      G1 = (Z1 > 0) * (G2 @ W2.T) # batch x hidden_dim
+
+      W1_grad = (1 / batch) * X_batch.T @ G1 # input_dim x hidden_dim
+      W2_grad = (1 / batch) * (Z1.T @ G2) # hidden_dim x num_classes
+
+      W1 -= lr * W1_grad
+      W2 -= lr * W2_grad
+    
+    return None
     ### END YOUR CODE
+
 
 
 
