@@ -207,7 +207,7 @@ class BroadcastTo(TensorOp):
       broadcasted = [True for _ in new_shape]
       for old_idx in reversed(range(len(old_shape))):
         new_idx = old_idx + len(new_shape) - len(old_shape)
-        
+
         if old_shape[old_idx] == new_shape[new_idx]:
           broadcasted[new_idx] = False
           continue
@@ -267,7 +267,7 @@ class MatMul(TensorOp):
     def _align_shape(self, x, y):
       if x.shape == y.shape:
         return x
-      
+
       summed_axes = tuple(range(len(x.shape) - len(y.shape)))
       return x.sum(summed_axes)
 

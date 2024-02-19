@@ -396,7 +396,7 @@ def compute_gradient_of_variables(output_tensor, out_grad):
           node_to_output_grads_list[k] = []
 
         node_to_output_grads_list[k].append(adj)
-    
+
     return node_to_output_grads_list
     ### END YOUR SOLUTION
 
@@ -429,7 +429,7 @@ def topo_sort_dfs(node: Value, visited: Set, topo_order: List[Value]):
     visited.add(node)
     for inp in node.inputs:
       topo_sort_dfs(inp, visited, topo_order)
-    
+
     topo_order.append(node)
 
 
