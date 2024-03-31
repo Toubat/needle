@@ -1,0 +1,4 @@
+/content/drive/.shortcut-targets-by-id/1Sas5budJcV8UntUgJppsSmY64GX48TMk/hw4/build/CMakeFiles/ndarray_backend_cpu.dir
+/content/drive/.shortcut-targets-by-id/1Sas5budJcV8UntUgJppsSmY64GX48TMk/hw4/build/CMakeFiles/ndarray_backend_cuda.dir
+/content/drive/.shortcut-targets-by-id/1Sas5budJcV8UntUgJppsSmY64GX48TMk/hw4/build/CMakeFiles/edit_cache.dir
+/content/drive/.shortcut-targets-by-id/1Sas5budJcV8UntUgJppsSmY64GX48TMk/hw4/build/CMakeFiles/rebuild_cache.dir
